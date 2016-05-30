@@ -1,4 +1,4 @@
-package gui;
+package model;
 
 public class Dificultad {
     public static int velocidadFlacoChico = 600;

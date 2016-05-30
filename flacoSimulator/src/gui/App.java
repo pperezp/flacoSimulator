@@ -5,8 +5,11 @@
  */
 package gui;
 
+import model.Dificultad;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -17,6 +20,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,56 +29,33 @@ import javazoom.jlgui.basicplayer.BasicPlayer;
 import javazoom.jlgui.basicplayer.BasicPlayerEvent;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 import javazoom.jlgui.basicplayer.BasicPlayerListener;
+import model.Juego;
+import model.K;
+import model.personajes.Flaco;
+import model.personajes.Malulo;
+import org.netbeans.lib.awtextra.AbsoluteConstraints;
 
 /**
  *
  * @author pperezp
  */
 public class App extends javax.swing.JFrame implements BasicPlayerListener{
-
-    static int kills = 0;
-    private List<String> frasesMalas;
-    private List<String> frasesBuenas;
+    
     private Thread frasesColores;
     private Thread hRisa;
     private Thread flacoChico;
     private Thread hMalulo;
     private BasicPlayer player;
     private BasicController control;
-    static List<JLabel> lblMalulos;
-    static List<JLabel> lblFlacosChicos;
+   
     
     
     public App() {
         try {
             initComponents();
+            Juego.init();
             
-            frasesMalas = new ArrayList<>();
-            frasesBuenas = new ArrayList<>();
-            
-            frasesMalas.add("Soy homosexual");
-            frasesMalas.add("Soy maraco");
-            frasesMalas.add("Tengo un pene en la raja");
-            frasesMalas.add("Me gustan los glandes");
-            frasesMalas.add("Te lo chupo gratis");
-            frasesMalas.add("Soy el pasivo de la relación");
-            frasesMalas.add("Me hago candado chino");
-            frasesMalas.add("Me dan por el orto");
-            
-            frasesBuenas.add("Soy el mas macho del universo");
-            frasesBuenas.add("Soy bkn");
-            frasesBuenas.add("Soy kchro po weon");
-            frasesBuenas.add("Soy el mas rico del universo");
-            frasesBuenas.add("Soy sex symbol");
-            frasesBuenas.add("Destajador de uteros");
-            frasesBuenas.add("Destrozador de ovarios");
-            frasesBuenas.add("Tengo el pene gigante");
-            frasesBuenas.add("Las minas me aman");
-            frasesBuenas.add("Me afeito con una motosierra");
-            frasesBuenas.add("Me corto las uñas a balazos");
-            
-//            setTitle("Flaco SIMULATOR 16 v0.1a");
-            setTitle("SAD SATAN DEEP WEB 16 v0.1a");
+            setTitle(Juego.TITULO+" "+Juego.VERSION);
 //        setExtendedState(JFrame.MAXIMIZED_BOTH);
             this.setLocationRelativeTo(null);
             
@@ -125,7 +106,7 @@ public class App extends javax.swing.JFrame implements BasicPlayerListener{
         lblMensaje.setOpaque(true);
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/flaco.png"))); // NOI18N
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/recursos/flaco.png"))); // NOI18N
         jLabel2.setOpaque(true);
         jLabel2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
@@ -271,9 +252,10 @@ public class App extends javax.swing.JFrame implements BasicPlayerListener{
     }
 
     private void comenzar() {
-        lblFlacosChicos = new ArrayList<>();
-        lblMalulos = new ArrayList<>();
-        kills = 0;
+        Juego.flacosChicos = new ArrayList<>();
+        Juego.malulos = new ArrayList<>();
+        Juego.kills = 0;
+        
         frasesColores = new Thread(new Runnable() {
 
             @Override
@@ -287,11 +269,11 @@ public class App extends javax.swing.JFrame implements BasicPlayerListener{
                         r = new Random();
 
                         if (jRadioButton1.isSelected()) {
-                            i = r.nextInt(frasesMalas.size());
-                            lblMensaje.setText(frasesMalas.get(i));
+                            i = r.nextInt(Juego.frasesMalas.size());
+                            lblMensaje.setText(Juego.frasesMalas.get(i));
                         } else {
-                            i = r.nextInt(frasesBuenas.size());
-                            lblMensaje.setText(frasesBuenas.get(i));
+                            i = r.nextInt(Juego.frasesBuenas.size());
+                            lblMensaje.setText(Juego.frasesBuenas.get(i));
                         }
 
                         red = r.nextInt(255);
@@ -343,9 +325,9 @@ public class App extends javax.swing.JFrame implements BasicPlayerListener{
                         c++;
 
                         if (c % 2 == 0) {
-                            jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/flaco.png")));
+                            jLabel2.setIcon(K.Recurso.IC_FLACO);
                         } else {
-                            jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/flaco2.png")));
+                            jLabel2.setIcon(K.Recurso.IC_FLACO_BOCA_ABIERTA);
                         }
                         Thread.sleep(300);
 
@@ -358,22 +340,41 @@ public class App extends javax.swing.JFrame implements BasicPlayerListener{
 
         hRisa.start();
 
+        
+        
+        
+        /*Hilo para generar los flacos chicos*/
         flacoChico = new Thread(new Runnable() {
 
             @Override
             public void run() {
                 
-                JLabel lbl;
+                Flaco flaco;
+                Point posicion;
                 int c = 0;
+                
                 try {
                     while (true) {
-                        lbl = new JLabel(new javax.swing.ImageIcon(getClass().getResource("/gui/flacoChico.png")));
+                        posicion = new Point();
+                        posicion.setLocation(
+                                new Random().nextInt(pnl2.getWidth() - 150), 
+                                new Random().nextInt(pnl2.getHeight() - 170)
+                        );
+                        
+                        
+                        flaco = new Flaco(
+                                c, 
+                                posicion,
+                                K.Recurso.IC_FLACO_CHICO, 
+                                K.Size.flacoChico
+                        );
+                        
+                        c++;
 
-                        lbl.setName("" + (c++));
-
-                        lblFlacosChicos.add(lbl);
-                        System.out.println("se añadio un flaco ("+lblFlacosChicos.size()+")");
-                        lbl.addMouseListener(new MouseListener() {
+                        Juego.flacosChicos.add(flaco);
+                        System.out.println("se añadio un flaco ("+Juego.flacosChicos.size()+")");
+                        
+                        flaco.addMouseListener(new MouseListener() {
 
                             @Override
                             public void mouseClicked(MouseEvent e) {
@@ -383,33 +384,32 @@ public class App extends javax.swing.JFrame implements BasicPlayerListener{
                             public void mousePressed(MouseEvent e) {
                                 int i = Integer.parseInt(e.getComponent().getName());
 
-                                lblFlacosChicos.get(i).setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/flachoChicoSorprendido.png")));
+                                Juego.flacosChicos.get(i).setIcon(K.Recurso.IC_FLACO_BOCA_ABIERTA);
                             }
 
                             @Override
                             public void mouseReleased(MouseEvent e) {
                                 
-//                            lbls.remove(i);
                             }
 
                             @Override
                             public void mouseEntered(MouseEvent e) {
                                 int i = Integer.parseInt(e.getComponent().getName());
 
-                                lblFlacosChicos.get(i).setVisible(false);
-                                kills++;
+                                Juego.flacosChicos.get(i).setVisible(false);
+                                Juego.kills++;
 //                                App.puntaje += 1;
-                                lblPuntaje.setText("[Flaco kills: " + kills + "]");
+                                lblPuntaje.setText("[Flaco kills: " + Juego.kills + "]");
 
-                                int flacoSize = lblFlacosChicos.size();
+                                int flacoSize = Juego.flacosChicos.size();
 
                                 System.out.println("-------------------------------");
                                 System.out.println("Comparacion");
                                 System.out.println("FlacoSize: "+flacoSize);
-                                System.out.println("KILLS: "+kills);
+                                System.out.println("KILLS: "+Juego.kills);
                                 
                                 
-                                if (flacoSize == kills) {
+                                if (flacoSize == Juego.kills) {
                                     pararHilos(true);
 
                                 }
@@ -422,7 +422,14 @@ public class App extends javax.swing.JFrame implements BasicPlayerListener{
 
 //                    System.out.println("WI: "+pnl2.getWidth());
 //                    System.out.println("HE: "+pnl2.getHeight());
-                        pnl2.add(lbl, new org.netbeans.lib.awtextra.AbsoluteConstraints(new Random().nextInt(pnl2.getWidth() - 150), new Random().nextInt(pnl2.getHeight() - 170), 41, 62));
+                        pnl2.add(
+                                flaco, 
+                                new AbsoluteConstraints(
+                                        flaco.getPosition(), 
+                                        flaco.getDimension()
+                                )
+                        );
+                        
                         pnl2.updateUI();
 
                         Thread.sleep(Dificultad.velocidadFlacoChico);
@@ -430,7 +437,7 @@ public class App extends javax.swing.JFrame implements BasicPlayerListener{
                     }
                 } catch (InterruptedException ex) {
 //                    Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
-                    lblFlacosChicos.clear();
+                    Juego.flacosChicos.clear();
                     System.out.println("flacosChicos clear");
                 }
             }
@@ -445,18 +452,26 @@ public class App extends javax.swing.JFrame implements BasicPlayerListener{
                 pnl2.removeAll();
                 pnl2.updateUI();
                 
-                JLabel lbl;
                 int c = 0;
+                
+                Malulo malulo;
+                Point posicion;
+                
                 try {
                     while (true) {
                         Thread.sleep(Dificultad.velocidadEnemigo);
                         
-                        lbl = new JLabel(new javax.swing.ImageIcon(getClass().getResource("/gui/malulo.png")));
+                        posicion = new Point();
+                        posicion.setLocation(
+                                new Random().nextInt(pnl2.getWidth() - 150), 
+                                new Random().nextInt(pnl2.getHeight() - 170)
+                        );
+                        
+                        malulo = new Malulo(c, posicion, K.Recurso.IC_MALULO, K.Size.malulo);
+                        c++;
 
-                        lbl.setName("" + (c++));
-
-                        lblMalulos.add(lbl);
-                        lbl.addMouseListener(new MouseListener() {
+                        Juego.malulos.add(malulo);
+                        malulo.addMouseListener(new MouseListener() {
 
                             @Override
                             public void mouseClicked(MouseEvent e) {
@@ -497,14 +512,20 @@ public class App extends javax.swing.JFrame implements BasicPlayerListener{
 
 //                    System.out.println("WI: "+pnl2.getWidth());
 //                    System.out.println("HE: "+pnl2.getHeight());
-                        pnl2.add(lbl, new org.netbeans.lib.awtextra.AbsoluteConstraints(new Random().nextInt(pnl2.getWidth() - 150), new Random().nextInt(pnl2.getHeight() - 170), 41, 62));
+                        pnl2.add(
+                                malulo, 
+                                new AbsoluteConstraints(
+                                        malulo.getPosition(), 
+                                        malulo.getDimension()
+                                )
+                        );
                         pnl2.updateUI();
 
                         
 
                     }
                 } catch (InterruptedException ex) {
-                    lblMalulos.clear();
+                    Juego.malulos.clear();
                     System.out.println("Clear malulos");
                 }
             }
