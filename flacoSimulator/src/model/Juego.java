@@ -27,10 +27,10 @@ public class Juego {
         frasesMalas.add("Me hago candado chino");
         frasesMalas.add("Me dan por el orto");
 
-        frasesBuenas.add("Soy el mas macho del universo");
+        frasesBuenas.add("Soy el más macho del universo");
         frasesBuenas.add("Soy bkn");
         frasesBuenas.add("Soy kchro po weon");
-        frasesBuenas.add("Soy el mas rico del universo");
+        frasesBuenas.add("Soy el más rico del universo");
         frasesBuenas.add("Soy sex symbol");
         frasesBuenas.add("Destajador de uteros");
         frasesBuenas.add("Destrozador de ovarios");
